@@ -1,0 +1,633 @@
+
+* TODO Dependencies
++ =aspell= (spellchecking)
+  * =aspell-fr= (French dictionary)
+  * =aspell-en= (English dictionary)
++ =texlive= (latex)
++ =gcc= or =clang= (org-roam need a C compiler) but maybe not
++ ~python3~ for treemacs
++ a directory ~/org-roam directory
++ a browser for ~org-roam-ui~
+
+* Global changes
+** Open todo.org
+#+begin_src emacs-lisp
+    (defun todo-visit ()
+      (interactive)
+      (find-file "~/todo.org"))
+    (global-set-key (kbd "C-c t") 'todo-visit)
+#+end_src
+** Electric (auto () «» {} etc.)
+#+begin_src emacs-lisp
+  (setq electric-pair-pairs '(
+  			    (?\( . ?\))
+  			    (?\[ . ?\])
+  			    (?\« . ?\»)
+  			    (?\{ . ?\})
+  			    (?\{ . ?\})
+  			    ))
+  (electric-pair-mode t)
+#+end_src
+** No space completion
+#+begin_src emacs-lisp
+  (define-key minibuffer-local-completion-map " " 'self-insert-command)
+#+end_src
+** Ensure that all packages are installed
+#+begin_src emacs-lisp
+  (setq use-package-always-ensure t)
+#+end_src
+** Fixes scroll
+#+begin_src emacs-lisp
+     (setq scroll-conservatively 100)
+
+     (setq
+        mouse-wheel-follow-mouse 't
+        mouse-wheel-progressive-speed nil
+        ;; Make each scroll-event move 2 lines at a time (instead of 5 at default).
+        ;; Simply hold down shift to move twice as fast, or hold down control to move
+        ;; 3x as fast. Perfect for trackpads.
+        mouse-wheel-scroll-amount '(1 ((shift) . 3) ((control) . 6)))
+#+end_src
+** Delete to trash
+#+begin_src emacs-lisp
+  (setq trash-directory "~/Trash")
+  (setq delete-by-moving-to-trash t)
+#+end_src
+** Hide default annoyances
+#+begin_src emacs-lisp
+  (setq inhibit-startup-message t)
+
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+
+  (setq ring-bell-function 'ignore)
+
+   (global-set-key (kbd "C-x C-b") 'ibuffer)
+#+end_src
+** Highlights current line
+#+begin_src emacs-lisp
+  (when window-system (global-hl-line-mode t))
+#+end_src
+** Show column number
+#+begin_src emacs-lisp
+  (column-number-mode 1)
+  (line-number-mode 1)
+#+end_src
+** Typing y/n is quicker than yes/no
+#+begin_src emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+end_src
+** For better navigation with M-e
+#+begin_src emacs-lisp
+  (setq sentence-end-double-space nil) ;; Sentences end with one space
+#+end_src
+** Disable backups or lockfiles
+#+begin_src emacs-lisp
+  (setq backup-inhibited t)
+  (setq make-backup-files nil)
+  (setq auto-save-default nil)
+#+end_src
+
+* TODO Dired
+** Global
+#+begin_src emacs-lisp
+  (setq dired-kill-when-opening-new-dired-buffer t)
+;  (setq image-dired-thumb-size 1000)
+#+end_src
+** TODO Launch with an other app
+#+begin_src emacs-lisp
+  ;; (use-package dired-launch
+  ;;   :ensure t
+  ;;   :init
+  ;;   (dired-launch-enable))
+#+end_src
+** Image preview
+#+begin_src emacs-lisp
+  (use-package dired-preview)
+  (setq dired-preview-delay 0.1)
+  (setq dired-preview-max-size (expt 2 20))
+  (setq dired-preview-ignored-extensions-regexp
+        (concat "\\."
+                "\\(gz\\|"
+                "zst\\|"
+                "tar\\|"
+                "xz\\|"
+                "rar\\|"
+                "zip\\|"
+                "iso\\|"
+                "epub"
+                "\\)"))
+
+  ;; Enable `dired-preview-mode' in a given Dired buffer or do it
+  ;; globally:
+  ;;  (dired-preview-global-mode 1)
+#+end_src
+
+* Org
+** General configuration
+#+begin_src emacs-lisp
+  (setq org-fontify-quote-and-verse-blocks t)
+  (setq org-src-fontify-natively t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-export-with-smart-quotes t)
+  (setq org-src-window-setup 'current-window)
+  (setq org-hide-emphasis-markers t)
+  (setq org-startup-folded t)
+  (setq org-ellipsis " ") ;; ▼, ↴, ⬎, ⤷, ⤵
+  (setq org-pretty-entities t)
+  (setq org-fontify-whole-heading-line t)
+  (setq org-list-demote-modify-bullet
+        '(("+" . "*") ("*" . "-") ("-" . "+")))
+  (setq org-cycle-separator-lines 1)
+  (setq org-catch-invisible-edits 'show-and-error) ;; 'smart
+#+end_src
+** Org Roam pkg
+It need a C compiler such as =clang= or =gcc=
+#+begin_src emacs-lisp
+   (use-package org-roam
+     :custom
+     (setq org-roam-directory "~/org-roam") ;; can be any directory
+     ;; TODO
+     (org-roam-capture-templates
+      '(("d" "default" plain
+         "%?"
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+         :unnarrowed t)
+        ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
+         :unnarrowed t)
+        ("b" "book notes" plain (file "~/org-roam/Templates/BookNoteTemplate.org")
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+         :unnarrowed t)
+        ("c" "course" plain (file "~/org-roam/Templates/CourseNoteTemplate.org")
+       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+       :unnarrowed t)))
+
+         :bind
+         (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture))
+         :config
+         (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+         (org-roam-db-autosync-mode))
+#+end_src
+** Org roam ui
+#+begin_src emacs-lisp
+    (use-package org-roam-ui
+        :after org-roam
+        :hook (after-init . org-roam-ui-mode)
+        :config
+        (setq org-roam-ui-sync-theme t
+              org-roam-ui-follow t
+              org-roam-ui-update-on-save t
+              org-roam-ui-open-on-start t))
+#+end_src
+** TODO Org agenda
+#+begin_src emacs-lisp
+  (setq org-agenda-span 'month)
+#+end_src
+** Emacs structures
+#+begin_src emacs-lisp
+  (setq org-structure-template-alist
+    '(("a" . "export ascii")
+      ("c" . "center")
+      ("C" . "comment")
+      ("e" . "example")
+      ("E" . "export")
+      ("h" . "export html")
+      ("l" . "export latex")
+      ("q" . "quote")
+      ("s" . "src")
+      ("p" . "src emacs-lisp")
+      ("v" . "verse")))
+#+end_src
+** Don't split when editing code
+#+begin_src emacs-lisp
+  (setq org-src-window-setup 'current-window)
+#+end_src
+** Org modern
+#+begin_src emacs-lisp
+  (use-package org-modern)
+  (global-org-modern-mode)
+#+end_src
+** Images display
+#+begin_src emacs-lisp
+  (setq org-image-actual-width 300)
+  (setq org-startup-with-inline-images t)
+  #+end_src
+** Better reading
+#+begin_src emacs-lisp
+  (add-hook 'org-mode-hook #'org-indent-mode)
+#+end_src
+** TODO Org presentation
+#+begin_src emacs-lisp
+  (use-package org-present)
+#+end_src 
+** TODO Org contact
+#+begin_src emacs-lisp
+;;  (use-package org-contacts)
+#+end_src
+
+* Convenient functions
+** Kill world
+#+begin_src emacs-lisp
+  (defun kill-whole-world ()
+    (interactive)
+    (backward-word)
+    (kill-word 1))
+  (global-set-key (kbd "C-c w") 'kill-whole-world)
+#+end_src
+** Copy line (with avy would be better?)
+#+begin_src emacs-lisp
+  (defun copy-whole-line ()
+    (interactive)
+    (save-excursion
+      (kill-new
+       (buffer-substring
+	(point-at-bol)
+	(point-at-eol)))))
+  (global-set-key (kbd "C-c l") 'copy-whole-line)
+
+#+end_src
+** Emacs Config edit/reload
+*** Edit
+#+begin_src emacs-lisp
+  (defun emacs-config-visit ()
+    (interactive)
+    (find-file "~/.emacs.d/config.org"))
+  (global-set-key (kbd "C-c e") 'emacs-config-visit)
+#+end_src
+*** Reload
+#+begin_src emacs-lisp
+  (defun emacs-config-reload ()
+    (interactive)
+    (org-babel-load-file (expand-file-name "~/.emacs.d/config.org")))
+  (global-set-key (kbd "C-c r") 'emacs-config-reload)
+#+end_src
+** Window splitting function
+*** Choose windows fast
+#+begin_src emacs-lisp
+  (defun split-and-follow-horinzontally ()
+    (interactive)
+    (split-window-below)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 2") 'split-and-follow-horinzontally)
+
+  (defun split-and-follow-vertically ()
+    (interactive)
+    (split-window-right)
+    (balance-windows)
+    (other-window 1))
+  (global-set-key (kbd "C-x 3") 'split-and-follow-vertically)
+#+end_src
+** Buffers
+*** TODO Maximize buffer
+#+begin_src emacs-lisp
+
+#+end_src
+*** Kill 
+*** the current buffer
+#+begin_src emacs-lisp
+  (defun kill-current-buffer ()
+    (interactive)
+    (kill-buffer (current-buffer)))
+  (global-set-key (kbd "C-x k") 'kill-current-buffer)
+#+end_src
+*** Kill all buffers
+#+begin_src emacs-lisp
+  (defun kill-all-buffers ()
+    (interactive)
+    (mapc 'kill-buffer (buffer-list)))
+  (global-set-key (kbd "C-M-k") 'kill-all-buffers)
+#+end_src
+
+* TODO Music in emacs
+
+** listen
+#+begin_src emacs-lisp
+;;  (use-package listen)
+#+end_src
+
+** EMMS
+#+begin_src emacs-lisp
+  (use-package emms)
+  (emms-all)
+  (setq emms-player-list '(emms-player-mpd)
+        emms-info-functions '(emms-info-native))
+  
+#+end_src
+
+* Nixos
+** Hilighting in nix
+#+begin_src emacs-lisp
+  (use-package nix-mode
+    :mode "\\.nix\\'")
+#+end_src
+** Edit configuration.nix
+#+begin_src emacs-lisp
+  (defun nixos-config-visit ()
+    (interactive)
+    (find-file "~/.nixos/hosts/default/configuration.nix"))
+  (global-set-key (kbd "C-c x") 'nixos-config-visit)
+#+end_src
+
+* Other packages
+** TODO empv
+#+begin_src emacs-lisp
+;;  (use-package empv)
+
+#+end_src
+** TODO Darkroom
+#+begin_src emacs-lisp
+      (use-package darkroom)
+#+end_src
+** TODO Elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed)
+
+  ;; (setq elfeed-feeds										 
+  ;;       '(("https://www.youtube.com/feeds/videos.xml?channel_id=UChV2oq_a-UZfJF-UiW0u-DQ" ytb)) 
+#+end_src
+** Async
+#+begin_src emacs-lisp
+  (use-package async
+  :ensure t
+  :init (dired-async-mode 1))
+#+end_src
+** Elcord (for discord)
+#+begin_src emacs-lisp
+  (use-package elcord)
+  (setq elcord-display-buffer-details nil)
+;;  (elcord-mode)
+#+end_src
+** TODO Treemacs
+#+begin_src emacs-lisp
+  (use-package treemacs
+    :ensure t
+    :defer t
+    :config
+    (progn
+      (setq
+       treemacs-width               25))
+    :bind
+    (:map global-map
+          ("C-x t t"   . treemacs)
+  	))
+  (use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
+  (treemacs-start-on-boot)
+#+end_src
+** Spell check
+Enable Flyspell (spellchecking) in these modes. Requires ~aspell~ to be installed with =aspell-en= and =aspell-fr= dictionaries
+#+BEGIN_SRC emacs-lisp 
+  (use-package flyspell
+   :defer t
+   :config
+;   (setq ispell-program-name "aspell")
+   (add-to-list 'ispell-skip-region-alist '("~" "~"))
+   (add-to-list 'ispell-skip-region-alist '("=" "="))
+   (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_SRC" . "^#\\+END_SRC"))
+   (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_EXPORT" . "^#\\+END_EXPORT"))
+   (add-to-list 'ispell-skip-region-alist '("^#\\+BEGIN_EXPORT" . "^#\\+END_EXPORT"))
+   (add-to-list 'ispell-skip-region-alist '(":\\(PROPERTIES\\|LOGBOOK\\):" . ":END:"))
+
+   (dolist (mode '(
+                   org-mode-hook
+                   mu4e-compose-mode-hook))
+     (add-hook mode (lambda () (flyspell-mode 1))))
+
+   (setq flyspell-issue-welcome-flag nil
+         flyspell-issue-message-flag nil)
+
+   (global-set-key
+    [f5]
+    (lambda ()
+      (interactive)
+      (ispell-change-dictionary "francais"))) 
+   (global-set-key
+    [f6]
+    (lambda ()
+      (interactive)
+      (ispell-change-dictionary "english")))
+
+   :custom ;; Switches correct word from middle click to right click
+   (general-define-key :keymaps 'flyspell-mouse-map
+                       "<mouse-3>" #'ispell-word
+                       "<mouse-2>" nil))
+      #+END_SRC
+** Auto completion
+#+begin_src emacs-lisp
+  (use-package company
+    :init
+    (add-hook 'after-init-hook 'global-company-mode))
+#+end_src
+** Avy
+*** To navigate fast
+#+begin_src emacs-lisp
+  (use-package avy
+    :bind
+    ("M-s" . avy-goto-char))
+  (setq avy-keys '(?a ?u ?i ?e ?t ?s ?r ?n ?v ?o ?p ?d))
+#+end_src
+** TODO Multiples cursors
+https://github.com/magnars/multiple-cursors.el
+#+begin_src emacs-lisp
+    (use-package multiple-cursors
+      :bind
+  ;   (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+      )
+  
+#+end_src
+** Dashboard
+
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :config
+    (dashboard-setup-startup-hook)
+    :custom
+    (dashboard-startup-banner )
+    (dashboard-banner-logo-title nil)
+    (dashboard-startup-banner "~/.emacs.d/eva.gif") ;; todo
+    (dashboard-icon-type 'nerd-icons)
+    (dashboard-set-heading-icons t)
+    (dashboard-center-content t)
+    (dashboard-set-file-icons t)
+    (dashboard-display-icons-p t)
+    (dashboard-items '(
+                       (recents . 10)))
+    ;; (setq initial-buffer-choice (lambda () (get-buffer-create dashboard-buffer-name))) ; if running emacsclient -c (as a deamon)
+
+    )
+    #+end_src
+** Dmenu
+*** launch app in emacs
+#+begin_src emacs-lisp
+  (use-package dmenu
+    :bind
+    ("s-l" . 'dmenu))
+#+end_src
+** Hungry delete | disabled
+*** Delete a big white space region 
+#+begin_src emacs-lisp
+;  (use-package hungry-delete
+;    :config (global-hungry-delete-mode))
+    #+end_src
+** Ivy
+#+begin_src emacs-lisp
+	(use-package ivy
+	  :config
+	(ivy-mode 1))
+
+	(use-package ivy-rich
+	    :after ivy
+	    :config
+	    (ivy-rich-mode 1))
+
+	(use-package counsel
+	:after ivy
+	:config (counsel-mode))
+
+      (use-package swiper
+	:bind
+	("C-s". 'swiper))
+
+	(use-package all-the-icons-ivy-rich
+	  :config
+	  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+	  (all-the-icons-ivy-rich-mode))
+#+end_src
+** Pretty symbols 
+*** Replace text with symbols
+#+begin_src emacs-lisp
+  (add-hook 'prog-mode-hook
+  (lambda ()
+   (setq prettify-symbols-alist
+      '(("lambda" . ?λ)
+	("->"     . ?→)
+	("map"    . ?↦)
+	("sqrt"   . ?√) 
+	("..."    . ?…))))
+   (prettify-symbols-mode 1))
+#+end_src
+** Modeline
+*** General
+#+begin_src emacs-lisp
+  (size-indication-mode 0)
+  (setq display-time-default-load-average nil)
+#+end_src
+*** Doomline
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :config
+  (setq doom-modeline-enable-word-count t))
+#+end_src
+*** Nyan Mode
+#+begin_src emacs-lisp
+      (use-package nyan-mode
+	:config
+	(nyan-start-animation)
+	(nyan-mode))
+#+end_src
+*** Clock
+#+begin_src emacs-lisp
+  (setq display-time-24hr-format t)
+  (display-time-mode 1)
+#+end_src
+*** Battery
+#+begin_src emacs-lisp
+  (display-battery-mode t)
+#+end_src
+** TODO kill ring
+#+begin_src emacs-lisp
+  ;; (setq kill-ring-max 100)
+  ;; (use-package popup-kill-ring
+  ;; :ensure t
+  ;; :bind ("M-y" . popup-kill-ring))
+#+end_src
+** Saveplace
+#+begin_src emacs-lisp
+    (use-package saveplace
+      :init (setq save-place-limit 100)
+      :config (save-place-mode))
+#+end_src
+** Rainbow
+*** Background hex color
+#+begin_src emacs-lisp 
+  (use-package rainbow-mode)
+  (rainbow-mode 1)
+#+end_src
+*** Nice delimiter for ((()))
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters)
+  (rainbow-delimiters-mode 1)
+#+end_src
+** Sudoedit
+#+begin_src emacs-lisp
+  (use-package sudo-edit
+    :bind ("s-e" . sudo-edit))
+#+end_src
+** Switch window
+#+begin_src emacs-lisp
+  (use-package switch-window
+    :config
+    (setq switch-window-input-style 'minibuffer)
+    (setq switch-window-increase 4)
+    (setq switch-window-threshold 2)
+    (setq switch-window-shortcut-style 'qwerty)
+    (setq switch-window-qwerty-shortcuts
+	  '("u" "i" "e" "t" "s" "r" "n"))
+    :bind
+    ([remap other-window] . switch-window))
+
+  (setq switch-window-shortcut-style 'qwerty)
+#+end_src
+** Which-key
+*** Reminder of commands while pressing them
+#+begin_src emacs-lisp
+  (use-package which-key
+    :init
+    (which-key-mode))
+#+end_src
+
+
+* Theming
+** Main theme
+#+begin_src emacs-lisp
+  (load-theme 'catppuccin :no-confirm)
+  (set-face-attribute 'default nil :font "HackNerdFont-13")
+  (set-frame-parameter nil 'alpha-background 92)
+#+end_src
+
+** pywal
+
+#+begin_src emacs-lisp
+  ;; (use-package selected-window-accent-mode
+  ;;   :config (selected-window-accent-mode 1)
+  ;;   :custom
+  ;;   (selected-window-accent-fringe-thickness 10)
+  ;;   (selected-window-accent-custom-color nil)
+  ;;   (selected-window-accent-mode-style 'subtle))
+#+end_src
+
+* TODO Latex
+#+begin_src emacs-lisp
+  (setq org-latex-listings 't);;for code highlightings
+
+  (with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes
+                 '("org-plain-latex"
+                   "\\documentclass{article}
+               [NO-DEFAULT-PACKAGES]
+               [PACKAGES]
+               [EXTRA]"
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+#+end_src
