@@ -599,7 +599,7 @@ https://github.com/magnars/multiple-cursors.el
 ** Main theme
 #+begin_src emacs-lisp
   (load-theme 'catppuccin :no-confirm)
-  (set-face-attribute 'default nil :font "HackNerdFont-13")
+  (set-face-attribute 'default nil :font "CozetteVector-13")
   (set-frame-parameter nil 'alpha-background 92)
 #+end_src
 
