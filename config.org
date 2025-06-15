@@ -366,20 +366,20 @@ It need a C compiler such as =clang= or =gcc=
 #+end_src
 ** TODO Treemacs
 #+begin_src emacs-lisp
-  (use-package treemacs
-    :ensure t
-    :defer t
-    :config
-    (progn
-      (setq
-       treemacs-width               25))
-    :bind
-    (:map global-map
-          ("C-x t t"   . treemacs)
-  	))
-  (use-package treemacs-icons-dired
-  :hook (dired-mode . treemacs-icons-dired-enable-once))
-  (treemacs-start-on-boot)
+  ;; (use-package treemacs
+  ;;   :ensure t
+  ;;   :defer t
+  ;;   :config
+  ;;   (progn
+  ;;     (setq
+  ;;      treemacs-width               25))
+  ;;   :bind
+  ;;   (:map global-map
+  ;;         ("C-x t t"   . treemacs)
+  ;; 	))
+  ;; (use-package treemacs-icons-dired
+  ;; :hook (dired-mode . treemacs-icons-dired-enable-once))
+  ;; (treemacs-start-on-boot)
 #+end_src
 ** Spell check
 Enable Flyspell (spellchecking) in these modes. Requires ~aspell~ to be installed with =aspell-en= and =aspell-fr= dictionaries
