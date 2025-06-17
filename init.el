@@ -39,7 +39,9 @@
 			    multiple-cursors nix-mode nyan-mode
 			    org-modern org-present org-roam-ui
 			    rainbow-delimiters rainbow-mode sudo-edit
-			    switch-window treemacs-icons-dired)))
+			    switch-window tree-sitter
+			    tree-sitter-langs treemacs-icons-dired
+			    typescript)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

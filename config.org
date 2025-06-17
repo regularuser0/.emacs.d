@@ -10,6 +10,7 @@
 + a browser for ~org-roam-ui~
 
 * Global changes
+
 ** Open todo.org
 #+begin_src emacs-lisp
     (defun todo-visit ()
@@ -56,14 +57,14 @@
 ** Hide default annoyances
 #+begin_src emacs-lisp
   (setq inhibit-startup-message t)
-
+  (setq large-file-warning-threshold nil)
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
 
   (setq ring-bell-function 'ignore)
 
-   (global-set-key (kbd "C-x C-b") 'ibuffer)
+  (global-set-key (kbd "C-x C-b") 'ibuffer)
 #+end_src
 ** Highlights current line
 #+begin_src emacs-lisp
@@ -88,6 +89,8 @@
   (setq make-backup-files nil)
   (setq auto-save-default nil)
 #+end_src
+
+
 
 * TODO Dired
 ** Global
@@ -345,6 +348,41 @@ It need a C compiler such as =clang= or =gcc=
 #+begin_src emacs-lisp
       (use-package darkroom)
 #+end_src
+** Tree-sitter
+#+begin_src emacs-lisp
+     (use-package tree-sitter
+       :config
+  (tree-sitter-require 'typescript))
+     (use-package tree-sitter-langs
+       :after tree-sitter)
+     (global-tree-sitter-mode)
+     (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+  (setq treesit-language-source-alist
+   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+     (cmake "https://github.com/uyha/tree-sitter-cmake")
+     (css "https://github.com/tree-sitter/tree-sitter-css")
+     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+     (go "https://github.com/tree-sitter/tree-sitter-go")
+     (html "https://github.com/tree-sitter/tree-sitter-html")
+     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+     (json "https://github.com/tree-sitter/tree-sitter-json")
+     (make "https://github.com/alemuller/tree-sitter-make")
+     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+     (python "https://github.com/tree-sitter/tree-sitter-python")
+     (toml "https://github.com/tree-sitter/tree-sitter-toml")
+     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+  (setq major-mode-remap-alist
+ '((yaml-mode . yaml-ts-mode)
+   (bash-mode . bash-ts-mode)
+   (js2-mode . js-ts-mode)
+   (typescript-mode . typescript-ts-mode)
+   (json-mode . json-ts-mode)
+   (css-mode . css-ts-mode)
+   (python-mode . python-ts-mode)))
+#+end_src
 ** TODO Elfeed
 #+begin_src emacs-lisp
   (use-package elfeed)
@@ -352,6 +390,9 @@ It need a C compiler such as =clang= or =gcc=
   ;; (setq elfeed-feeds										 
   ;;       '(("https://www.youtube.com/feeds/videos.xml?channel_id=UChV2oq_a-UZfJF-UiW0u-DQ" ytb)) 
 #+end_src
+
+#+RESULTS:
+
 ** Async
 #+begin_src emacs-lisp
   (use-package async
