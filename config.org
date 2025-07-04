@@ -2,12 +2,11 @@
 * TODO Dependencies
 + =aspell= (spellchecking)
   * =aspell-fr= (French dictionary)
-  * =aspell-en= (English dictionary)
+  * =aspell-en= (English dictionary) (installed by default when installing ~aspell~)
 + =texlive= (latex)
 + =gcc= or =clang= (org-roam need a C compiler) but maybe not
-+ ~python3~ for treemacs
-+ a directory ~/org-roam directory
-+ a browser for ~org-roam-ui~
++ a _directory_ ~/org-roam directory
++ a _browser_ for ~org-roam-ui~
 
 * Global changes
 
@@ -61,6 +60,7 @@
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
+
 
   (setq ring-bell-function 'ignore)
 
@@ -306,22 +306,6 @@ It need a C compiler such as =clang= or =gcc=
     (interactive)
     (mapc 'kill-buffer (buffer-list)))
   (global-set-key (kbd "C-M-k") 'kill-all-buffers)
-#+end_src
-
-* TODO Music in emacs
-
-** listen
-#+begin_src emacs-lisp
-;;  (use-package listen)
-#+end_src
-
-** EMMS
-#+begin_src emacs-lisp
-  (use-package emms)
-  (emms-all)
-  (setq emms-player-list '(emms-player-mpd)
-        emms-info-functions '(emms-info-native))
-  
 #+end_src
 
 * Nixos
@@ -610,7 +594,7 @@ https://github.com/magnars/multiple-cursors.el
 ** Sudoedit
 #+begin_src emacs-lisp
   (use-package sudo-edit
-    :bind ("s-e" . sudo-edit))
+    :bind ("C-c s" . sudo-edit))
 #+end_src
 ** Switch window
 #+begin_src emacs-lisp
@@ -642,6 +626,8 @@ https://github.com/magnars/multiple-cursors.el
   (load-theme 'catppuccin :no-confirm)
   (set-face-attribute 'default nil :font "CozetteVector-13")
   (set-frame-parameter nil 'alpha-background 92)
+  (blink-cursor-mode -1)
+  (setq cursor-type 'hollow)
 #+end_src
 
 ** pywal
@@ -657,18 +643,5 @@ https://github.com/magnars/multiple-cursors.el
 
 * TODO Latex
 #+begin_src emacs-lisp
-  (setq org-latex-listings 't);;for code highlightings
 
-  (with-eval-after-load 'ox-latex
-    (add-to-list 'org-latex-classes
-                 '("org-plain-latex"
-                   "\\documentclass{article}
-               [NO-DEFAULT-PACKAGES]
-               [PACKAGES]
-               [EXTRA]"
-                   ("\\section{%s}" . "\\section*{%s}")
-                   ("\\subsection{%s}" . "\\subsection*{%s}")
-                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 #+end_src
