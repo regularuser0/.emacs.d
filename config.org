@@ -145,37 +145,36 @@
         '(("+" . "*") ("*" . "-") ("-" . "+")))
   (setq org-cycle-separator-lines 1)
   (setq org-catch-invisible-edits 'show-and-error) ;; 'smart
+  (visual-line-mode 1)
 #+end_src
 ** Org Roam pkg
-It need a C compiler such as =clang= or =gcc=
+It needs a C compiler such as =clang= or =gcc=.
 #+begin_src emacs-lisp
-   (use-package org-roam
-     :custom
-     (setq org-roam-directory "~/org-roam") ;; can be any directory
-     ;; TODO
-     (org-roam-capture-templates
-      '(("d" "default" plain
-         "%?"
-         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-         :unnarrowed t)
-        ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
-         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
-         :unnarrowed t)
-        ("b" "book notes" plain (file "~/org-roam/Templates/BookNoteTemplate.org")
-         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-         :unnarrowed t)
-        ("c" "course" plain (file "~/org-roam/Templates/CourseNoteTemplate.org")
-       :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-       :unnarrowed t)))
+  (use-package org-roam
+    :custom
+    (setq org-roam-directory "~/org-roam") ;; can be any directory
+    ;; TODO
+    (org-roam-capture-templates
+     '(("d" "default" plain
+        "%?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+        :unnarrowed t)
+       ;; ("p" "project" plain "* Goals\n\n%?\n\n* Tasks\n\n** TODO Add initial tasks\n\n* Dates\n\n"
+       ;;  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: Project")
+       ;;  :unnarrowed t)
+       ;; ("b" "book notes" plain (file "~/org-roam/Templates/BookNoteTemplate.org")
+       ;;  :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+       ;;  :unnarrowed t)
+       ))
 
-         :bind
-         (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture))
-         :config
-         (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-         (org-roam-db-autosync-mode))
+        :bind
+        (("C-c n t" . org-roam-buffer-toggle)
+        ("C-c n f" . org-roam-node-find)
+        ("C-c n i" . org-roam-node-insert)
+        ("C-c n c" . org-roam-capture))
+        :config
+        (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+        (org-roam-db-autosync-mode))
 #+end_src
 ** Org roam ui
 #+begin_src emacs-lisp
@@ -218,7 +217,7 @@ It need a C compiler such as =clang= or =gcc=
 #+end_src
 ** Images display
 #+begin_src emacs-lisp
-  (setq org-image-actual-width 300)
+  (setq org-image-actual-width 1000)
   (setq org-startup-with-inline-images t)
   #+end_src
 ** Better reading
@@ -307,6 +306,10 @@ It need a C compiler such as =clang= or =gcc=
     (mapc 'kill-buffer (buffer-list)))
   (global-set-key (kbd "C-M-k") 'kill-all-buffers)
 #+end_src
+** Remap
+#+begin_src emacs-lisp
+  (global-set-key (kbd "C-c c") 'comment-line)     
+#+end_src
 
 * Nixos
 ** Hilighting in nix
@@ -334,38 +337,38 @@ It need a C compiler such as =clang= or =gcc=
 #+end_src
 ** Tree-sitter
 #+begin_src emacs-lisp
-     (use-package tree-sitter
-       :config
-  (tree-sitter-require 'typescript))
-     (use-package tree-sitter-langs
-       :after tree-sitter)
-     (global-tree-sitter-mode)
-     (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
+  (use-package tree-sitter
+    :config
+    (tree-sitter-require 'typescript))
+  (use-package tree-sitter-langs
+    :after tree-sitter)
+  (global-tree-sitter-mode)
+  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode)
   (setq treesit-language-source-alist
-   '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-     (cmake "https://github.com/uyha/tree-sitter-cmake")
-     (css "https://github.com/tree-sitter/tree-sitter-css")
-     (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-     (go "https://github.com/tree-sitter/tree-sitter-go")
-     (html "https://github.com/tree-sitter/tree-sitter-html")
-     (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-     (json "https://github.com/tree-sitter/tree-sitter-json")
-     (make "https://github.com/alemuller/tree-sitter-make")
-     (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-     (python "https://github.com/tree-sitter/tree-sitter-python")
-     (toml "https://github.com/tree-sitter/tree-sitter-toml")
-     (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-     (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-     (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+  	(cmake "https://github.com/uyha/tree-sitter-cmake")
+  	(css "https://github.com/tree-sitter/tree-sitter-css")
+  	(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+  	(go "https://github.com/tree-sitter/tree-sitter-go")
+  	(html "https://github.com/tree-sitter/tree-sitter-html")
+  	(javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+  	(json "https://github.com/tree-sitter/tree-sitter-json")
+  	(make "https://github.com/alemuller/tree-sitter-make")
+  	(markdown "https://github.com/ikatyang/tree-sitter-markdown")
+  	(python "https://github.com/tree-sitter/tree-sitter-python")
+  	(toml "https://github.com/tree-sitter/tree-sitter-toml")
+  	(tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+  	(typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+  	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
   (setq major-mode-remap-alist
- '((yaml-mode . yaml-ts-mode)
-   (bash-mode . bash-ts-mode)
-   (js2-mode . js-ts-mode)
-   (typescript-mode . typescript-ts-mode)
-   (json-mode . json-ts-mode)
-   (css-mode . css-ts-mode)
-   (python-mode . python-ts-mode)))
+        '((yaml-mode . yaml-ts-mode)
+  	(bash-mode . bash-ts-mode)
+  	(js2-mode . js-ts-mode)
+  	(typescript-mode . typescript-ts-mode)
+  	(json-mode . json-ts-mode)
+  	(css-mode . css-ts-mode)
+  	(python-mode . python-ts-mode)))
 #+end_src
 ** TODO Elfeed
 #+begin_src emacs-lisp
@@ -376,7 +379,6 @@ It need a C compiler such as =clang= or =gcc=
 #+end_src
 
 #+RESULTS:
-
 ** Async
 #+begin_src emacs-lisp
   (use-package async
@@ -476,7 +478,8 @@ https://github.com/magnars/multiple-cursors.el
     :custom
     (dashboard-startup-banner )
     (dashboard-banner-logo-title nil)
-    (dashboard-startup-banner "~/.emacs.d/eva.gif") ;; todo
+    (dashboard-startup-banner "~/.emacs.d/eva.gif")
+    ;;(dashboard-startup-banner "~/.config/fastfetch/alolo.png")
     (dashboard-icon-type 'nerd-icons)
     (dashboard-set-heading-icons t)
     (dashboard-center-content t)
@@ -529,14 +532,14 @@ https://github.com/magnars/multiple-cursors.el
 *** Replace text with symbols
 #+begin_src emacs-lisp
   (add-hook 'prog-mode-hook
-  (lambda ()
-   (setq prettify-symbols-alist
-      '(("lambda" . ?λ)
-	("->"     . ?→)
-	("map"    . ?↦)
-	("sqrt"   . ?√) 
-	("..."    . ?…))))
-   (prettify-symbols-mode 1))
+  	  (lambda ()
+  	    (setq prettify-symbols-alist
+  		  '(("lambda" . ?λ)
+  		    ("->"     . ?→)
+  		    ("map"    . ?↦)
+  		    ("sqrt"   . ?√) 
+  		    ("..."    . ?…)))))
+  	  (prettify-symbols-mode 1)
 #+end_src
 ** Modeline
 *** General
@@ -546,10 +549,12 @@ https://github.com/magnars/multiple-cursors.el
 #+end_src
 *** Doomline
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :config
-  (setq doom-modeline-enable-word-count t))
+      (use-package doom-modeline
+      :init (doom-modeline-mode 1)
+      :config
+      (setq doom-modeline-enable-word-count t)
+      (setq doom-modeline-buffer-encoding nil)
+      )
 #+end_src
 *** Nyan Mode
 #+begin_src emacs-lisp
@@ -569,10 +574,10 @@ https://github.com/magnars/multiple-cursors.el
 #+end_src
 ** TODO kill ring
 #+begin_src emacs-lisp
-  ;; (setq kill-ring-max 100)
-  ;; (use-package popup-kill-ring
-  ;; :ensure t
-  ;; :bind ("M-y" . popup-kill-ring))
+(setq kill-ring-max 100)
+(use-package popup-kill-ring
+:ensure t
+:bind ("M-y" . popup-kill-ring))
 #+end_src
 ** Saveplace
 #+begin_src emacs-lisp
