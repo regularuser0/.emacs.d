@@ -9,7 +9,6 @@
 + a _browser_ for ~org-roam-ui~
 
 * Global changes
-
 ** Open todo.org
 #+begin_src emacs-lisp
     (defun todo-visit ()
@@ -107,7 +106,9 @@
 #+end_src
 ** Image preview
 #+begin_src emacs-lisp
-  (use-package dired-preview)
+(use-package dired-preview
+  :after dired
+  :config
   (setq dired-preview-delay 0.1)
   (setq dired-preview-max-size (expt 2 20))
   (setq dired-preview-ignored-extensions-regexp
@@ -121,10 +122,8 @@
                 "iso\\|"
                 "epub"
                 "\\)"))
-
-  ;; Enable `dired-preview-mode' in a given Dired buffer or do it
-  ;; globally:
-  ;;  (dired-preview-global-mode 1)
+  ;; Enable globally
+  (dired-preview-global-mode 1))
 #+end_src
 
 * Org
@@ -174,6 +173,7 @@ It needs a C compiler such as =clang= or =gcc=.
         ("C-c n c" . org-roam-capture))
         :config
         (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+        (setq org-roam-completion-everywhere t)
         (org-roam-db-autosync-mode))
 #+end_src
 ** Org roam ui
@@ -331,7 +331,7 @@ It needs a C compiler such as =clang= or =gcc=.
 ;;  (use-package empv)
 
 #+end_src
-** TODO Darkroom
+** Darkroom
 #+begin_src emacs-lisp
       (use-package darkroom)
 #+end_src
@@ -634,8 +634,7 @@ https://github.com/magnars/multiple-cursors.el
   (blink-cursor-mode -1)
   (setq cursor-type 'hollow)
 #+end_src
-
-** pywal
+** TODO pywal
 
 #+begin_src emacs-lisp
   ;; (use-package selected-window-accent-mode
