@@ -91,13 +91,13 @@
 
 
 
-* TODO Dired
+* Dired
 ** Global
 #+begin_src emacs-lisp
   (setq dired-kill-when-opening-new-dired-buffer t)
 ;  (setq image-dired-thumb-size 1000)
 #+end_src
-** TODO Launch with an other app
+** Launch with an other app
 #+begin_src emacs-lisp
   ;; (use-package dired-launch
   ;;   :ensure t
@@ -145,6 +145,7 @@
   (setq org-cycle-separator-lines 1)
   (setq org-catch-invisible-edits 'show-and-error) ;; 'smart
   (visual-line-mode 1)
+  
 #+end_src
 ** Org Roam pkg
 It needs a C compiler such as =clang= or =gcc=.
@@ -227,6 +228,20 @@ It needs a C compiler such as =clang= or =gcc=.
 ** TODO Org presentation
 #+begin_src emacs-lisp
   (use-package org-present)
+  (eval-after-load "org-present"
+  '(progn
+     (add-hook 'org-present-mode-hook
+               (lambda ()
+                 (org-present-big)
+                 (org-display-inline-images)
+                 (org-present-hide-cursor)
+                 (org-present-read-only)))
+     (add-hook 'org-present-mode-quit-hook
+               (lambda ()
+                 (org-present-small)
+                 (org-remove-inline-images)
+                 (org-present-show-cursor)
+                 (org-present-read-write)))))
 #+end_src 
 ** TODO Org contact
 #+begin_src emacs-lisp
@@ -326,14 +341,20 @@ It needs a C compiler such as =clang= or =gcc=.
 #+end_src
 
 * Other packages
-** TODO empv
+** Visual fill column
+#+begin_src emacs-lisp
+  ;; (use-package visual-fill-column)
+  ;; (visual-fill-column-mode 1)
+  ;; (visual-fill-column-toggle-center-text)
+#+end_src
+** empv
 #+begin_src emacs-lisp
 ;;  (use-package empv)
 
 #+end_src
 ** Darkroom
 #+begin_src emacs-lisp
-      (use-package darkroom)
+  (use-package darkroom)
 #+end_src
 ** Tree-sitter
 #+begin_src emacs-lisp
@@ -391,7 +412,7 @@ It needs a C compiler such as =clang= or =gcc=.
   (setq elcord-display-buffer-details nil)
 ;;  (elcord-mode)
 #+end_src
-** TODO Treemacs
+** Treemacs
 #+begin_src emacs-lisp
   ;; (use-package treemacs
   ;;   :ensure t
@@ -586,10 +607,10 @@ https://github.com/magnars/multiple-cursors.el
 #+end_src
 ** TODO kill ring
 #+begin_src emacs-lisp
-(setq kill-ring-max 100)
-(use-package popup-kill-ring
-:ensure t
-:bind ("M-y" . popup-kill-ring))
+  (setq kill-ring-max 100)
+  ;; (use-package popup-kill-ring
+  ;; :ensure t
+  ;; :bind ("M-y" . popup-kill-ring))
 #+end_src
 ** Saveplace
 #+begin_src emacs-lisp
@@ -646,15 +667,10 @@ https://github.com/magnars/multiple-cursors.el
   (blink-cursor-mode -1)
   (setq cursor-type 'hollow)
 #+end_src
-** TODO pywal
+** TODO wallust
 
 #+begin_src emacs-lisp
-  ;; (use-package selected-window-accent-mode
-  ;;   :config (selected-window-accent-mode 1)
-  ;;   :custom
-  ;;   (selected-window-accent-fringe-thickness 10)
-  ;;   (selected-window-accent-custom-color nil)
-  ;;   (selected-window-accent-mode-style 'subtle))
+
 #+end_src
 
 * TODO Latex
