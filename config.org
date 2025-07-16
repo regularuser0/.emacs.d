@@ -434,12 +434,15 @@ It needs a C compiler such as =clang= or =gcc=.
   (auto-insert-mode 1)
   (setq auto-insert-query t) ;; ask before inserting
 
-  (define-auto-insert
-  "\\.org\\'" ;; for all .org files
-  '("Org-mode LaTeX template"
-    "#+TITLE: " (read-string "Titre du document: ") "\n"
-    "#+AUTHOR: " (read-string "Auteur: ") "\n"
-    "#+INCLUDE: \"~/.emacs.d/latex-config.org\"\n\n"))
+(define-auto-insert
+  "\\.org\\'" ;; pour tous les fichiers .org
+  (lambda ()
+    (let* ((classes '("elegant-article"))
+           (chosen-class (completing-read "Classe LaTeX : " classes nil t)))
+      (insert (concat "#+LATEX_CLASS: " chosen-class "\n"))
+      (insert (concat "#+TITLE: " (read-string "Titre du document : ") "\n"))
+      (insert (concat "#+AUTHOR: " (read-string "Auteur : ") "\n\n")))))
+
 #+end_src
 ** Spell check
 Enable Flyspell (spellchecking) in these modes. Requires ~aspell~ to be installed with =aspell-en= and =aspell-fr= dictionaries
@@ -676,52 +679,107 @@ https://github.com/magnars/multiple-cursors.el
 * TODO Latex
 #+begin_src emacs-lisp
 
-  (defun my/org-export-to-pdf-and-open-once ()
-    "Export Org to PDF, remove .tex file, and open PDF in Zathura only once."
-    (interactive)
-    (let* ((base (file-name-sans-extension (buffer-file-name)))
-           (pdf (concat base ".pdf"))
-           (tex (concat base ".tex"))
-           ;; Check if Zathura is already running
-           (zathura-running (string-match-p "zathura"
-                                            (shell-command-to-string "pgrep -a zathura"))))
-      ;; Export to PDF
-      (org-latex-export-to-pdf)
-      ;; Remove the .tex file if it exists
-      (when (file-exists-p tex)
-        (delete-file tex)
-        (message "Deleted: %s" tex))
-      ;; Open Zathura only if not already running
-      (when (file-exists-p pdf)
-        (unless zathura-running
-          (start-process "zathura" nil "zathura" pdf)))))
+              (defun my/org-export-to-pdf-and-open-once ()
+                "Export Org to PDF, remove .tex file, and open PDF in Zathura only once."
+                (interactive)
+                (let* ((base (file-name-sans-extension (buffer-file-name)))
+                       (pdf (concat base ".pdf"))
+                       (tex (concat base ".tex"))
+                       ;; Check if Zathura is already running
+                       (zathura-running (string-match-p "zathura"
+                                                        (shell-command-to-string "pgrep -a zathura"))))
+                  ;; Export to PDF
+                  (org-latex-export-to-pdf)
+                  ;; Remove the .tex file if it exists
+                  (when (file-exists-p tex)
+                    (delete-file tex)
+                    (message "Deleted: %s" tex))
+                  ;; Open Zathura only if not already running
+                  (when (file-exists-p pdf)
+                    (unless zathura-running
+                      (start-process "zathura" nil "zathura" pdf)))))
 
-  (define-key org-mode-map (kbd "C-c C-p") #'my/org-export-to-pdf-and-open-once)
+              (define-key org-mode-map (kbd "C-c C-p") #'my/org-export-to-pdf-and-open-once)
 
 
-    ;; latex preview scale
-    (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
-    ;; pretty pdf
+              ;; latex preview scale
+              (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+              ;; pretty pdf
     (setq org-latex-compiler "xelatex")
 
     (with-eval-after-load 'ox-latex
       (add-to-list 'org-latex-classes
                    '("elegant-article"
                      "\\documentclass[11pt]{article}
-            \\usepackage{fontspec}
-            \\usepackage{polyglossia}
-            \\setmainfont{TeX Gyre Pagella}
-            \\setdefaultlanguage{french}
-            \\usepackage{amsmath, amssymb}
-            \\usepackage{microtype}
-            \\usepackage{geometry}
-            \\usepackage{graphicx}
-            \\usepackage{hyperref}
-            \\usepackage{mathpazo}
-            \\geometry{margin=2.5cm}
-            \\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
-            \\setlength{\\parskip}{1ex}
-            \\setlength{\\parindent}{0pt}"
+    \\usepackage{fontspec}
+    \\usepackage{polyglossia}
+    \\setmainfont{TeX Gyre Pagella}
+    \\setdefaultlanguage{french}
+    \\usepackage{amsmath, amssymb}
+    \\usepackage{microtype}
+    \\usepackage{geometry}
+    \\usepackage{graphicx}
+    \\usepackage{hyperref}
+    \\usepackage{mathpazo}
+    \\usepackage{csquotes}
+    \\usepackage{lastpage}
+    \\usepackage{fancyhdr}
+    \\usepackage{titling}
+    \\geometry{margin=2.5cm}
+    \\hypersetup{
+      colorlinks=true,
+      linkcolor=blue,
+      urlcolor=blue,
+      pdftitle={\\@title},
+      pdfauthor={\\@author}
+    }
+\\usepackage{enumitem}
+\\setlist[itemize,1]{
+  label=\\textbullet,
+  left=1em,
+  itemsep=0pt,
+  topsep=0pt
+}
+\\setlist[itemize,2]{
+  label=\\textopenbullet,
+  left=1em,
+  itemsep=0pt,
+  topsep=0pt
+}
+\\setlist[itemize,3]{
+  label=\\tiny$\\triangleright$,
+  left=1em,
+  itemsep=0pt,
+  topsep=0pt
+}
+    \\pagestyle{fancy}
+    \\fancyhf{}
+    \\makeatletter
+    \\AtBeginDocument{%
+      \\fancyhead[L]{\\@title}
+      \\fancyhead[R]{\\@author}
+      \\fancyfoot[L]{\\the\\year\\space \\@author}
+      \\fancyfoot[C]{}
+      \\fancyfoot[R]{Page \\thepage\\ / \\pageref{LastPage}}
+      \\thispagestyle{fancy}
+    }
+    \\fancypagestyle{plain}{%
+      \\fancyhf{}
+      \\fancyhead[L]{\\@title}
+      \\fancyhead[R]{\\@author}
+      \\fancyfoot[L]{\\the\\year\\space \\@author}
+      \\fancyfoot[C]{}
+      \\fancyfoot[R]{Page \\thepage\\ / \\pageref{LastPage}}
+    }
+    \\makeatother
+    \\pretitle{\\begin{center}\\LARGE\\bfseries}
+    \\posttitle{\\par\\end{center}\\vskip 0.5em}
+    \\preauthor{\\begin{center}\\large}
+    \\postauthor{\\par\\end{center}}
+    \\predate{\\begin{center}\\small}
+    \\postdate{\\par\\end{center}}
+    \\setlength{\\parskip}{1ex}
+    \\setlength{\\parindent}{10pt}"
                      ("\\section{%s}" . "\\section*{%s}")
                      ("\\subsection{%s}" . "\\subsection*{%s}")
                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
