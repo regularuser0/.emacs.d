@@ -34,13 +34,13 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(all-the-icons-ivy-rich async avy catppuccin-theme company counsel
-			    darkroom dashboard dired-preview dmenu
-			    doom-modeline elcord elfeed emms
-			    multiple-cursors nix-mode nyan-mode
-			    org-modern org-present org-roam-ui
-			    popup-kill-ring rainbow-delimiters
-			    rainbow-mode sudo-edit sunshine
-			    switch-window tree-sitter-langs
+			    darkroom dashboard dired-preview
+			    disk-usage dmenu doom-modeline elcord
+			    elfeed emms multiple-cursors nix-mode
+			    nyan-mode org-modern org-present
+			    org-roam-ui popup-kill-ring
+			    rainbow-delimiters rainbow-mode sudo-edit
+			    sunshine switch-window tree-sitter-langs
 			    visual-fill-column)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
